@@ -109,6 +109,11 @@ defmodule NeoscanMonitor.Worker do
     {:noreply, state}
   end
 
+  # handles error messages received
+  def handle_info({_ref, {:error, _reason, _pid}}, state) do
+    {:noreply, state}
+  end
+
   # adds a block to the state
   def add_block(block) do
     currrent = Server.get(:blocks)
