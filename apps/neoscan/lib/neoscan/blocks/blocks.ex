@@ -312,13 +312,7 @@ defmodule Neoscan.Blocks do
     query =
       from(
         e in Block,
-        select: e.index,
-        where: e.index > -1,
-        # force postgres to use index
-        order_by: [
-          desc: e.index
-        ],
-        limit: 1
+        select: max(e.index)
       )
 
     case Repo.all(query) do
