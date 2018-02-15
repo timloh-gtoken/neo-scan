@@ -45,7 +45,7 @@ defmodule Neoscan.Addresses do
       from(
         a in Address,
         order_by: [
-          desc: a.updated_at
+          fragment("? DESC NULLS LAST", a.updated_at)
         ],
         select: %{
           :address => a.address,
@@ -86,7 +86,7 @@ defmodule Neoscan.Addresses do
       from(
         e in Address,
         order_by: [
-          desc: e.updated_at
+          fragment("? DESC NULLS LAST", e.updated_at)
         ],
         select: %{
           :address => e.address,
@@ -381,7 +381,7 @@ defmodule Neoscan.Addresses do
         e in Address,
         where: e.address in ^lookups,
         order_by: [
-          desc: e.updated_at
+          fragment("? DESC NULLS LAST", e.updated_at)
         ],
         select: map(e, [:id, :address, :balance, :time, :tx_count]),
         limit: 5
