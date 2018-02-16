@@ -737,7 +737,7 @@ defmodule Neoscan.Api do
         e in Block,
         where: e.index > 1_200_000,
         order_by: [
-          desc: e.index
+          fragment("? DESC NULLS LAST", e.index)
         ],
         preload: [
           transactions: ^tran_query
@@ -791,7 +791,7 @@ defmodule Neoscan.Api do
         e in Block,
         where: e.index > 1_200_000,
         order_by: [
-          desc: e.index
+          fragment("? DESC NULLS LAST", e.index)
         ],
         preload: [
           transactions: ^tran_query
@@ -1000,7 +1000,7 @@ defmodule Neoscan.Api do
           t in Transaction,
           where: t.inserted_at > ago(1, "hour"),
           order_by: [
-            desc: t.inserted_at
+            fragment("? DESC NULLS LAST", t.inserted_at)
           ],
           preload: [
             vouts: ^vout_query
@@ -1011,7 +1011,7 @@ defmodule Neoscan.Api do
         from(
           t in Transaction,
           order_by: [
-            desc: t.inserted_at
+            fragment("? DESC NULLS LAST", t.inserted_at)
           ],
           where: t.type == ^type and t.inserted_at > ago(1, "hour"),
           preload: [
