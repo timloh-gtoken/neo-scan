@@ -3,6 +3,7 @@ defmodule Neoscan.Transactions.Transaction do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @derive {Poison.Encoder, except: [:__meta__, :__struct__]}
   schema "transactions" do
     field(:attributes, {:array, :map})
     field(:net_fee, :string)

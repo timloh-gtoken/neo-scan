@@ -6,6 +6,7 @@ defmodule Neoscan.Addresses.Address do
   import Ecto.Changeset
   alias Neoscan.Addresses.Address
 
+  @derive {Poison.Encoder, except: [:__meta__, :__struct__]}
   schema "addresses" do
     field(:address, :string)
     field(:balance, :map)

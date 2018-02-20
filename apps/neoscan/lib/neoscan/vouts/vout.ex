@@ -5,6 +5,7 @@ defmodule Neoscan.Vouts.Vout do
   alias Neoscan.Vouts.Vout
   alias Neoscan.ChainAssets
 
+  @derive {Poison.Encoder, except: [:__meta__, :__struct__]}
   schema "vouts" do
     field(:asset, :string)
     field(:address_hash, :string)

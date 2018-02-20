@@ -4,6 +4,7 @@ defmodule Neoscan.ChainAssets.Asset do
   import Ecto.Changeset
   alias Neoscan.ChainAssets.Asset
 
+  @derive {Poison.Encoder, except: [:__meta__, :__struct__]}
   schema "assets" do
     # assets are referenced by their register transaction txid
     field(:txid, :string)
