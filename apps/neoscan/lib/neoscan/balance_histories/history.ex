@@ -7,6 +7,7 @@ defmodule Neoscan.BalanceHistories.History do
   import Ecto.Changeset
   alias Neoscan.BalanceHistories.History
 
+  @derive {Poison.Encoder, except: [:__meta__, :__struct__]}
   schema "histories" do
     field(:address_hash, :string)
     field(:txid, :string)

@@ -4,6 +4,7 @@ defmodule Neoscan.Stats.Counter do
   import Ecto.Changeset
   alias Neoscan.Stats.Counter
 
+  @derive {Poison.Encoder, except: [:__meta__, :__struct__]}
   schema "counters" do
     field(:total_blocks, :integer)
     field(:total_transactions, :integer)
