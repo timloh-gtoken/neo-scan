@@ -8,6 +8,7 @@ defmodule Neoscan.Blocks.Block do
   alias Neoscan.BlockGasGeneration
   alias Neoscan.Blocks.Block
 
+  @derive {Poison.Encoder, except: [:__meta__, :__struct__]}
   schema "blocks" do
     field(:confirmations, :integer)
     field(:hash, :string)

@@ -4,6 +4,7 @@ defmodule Neoscan.Claims.Claim do
   import Ecto.Changeset
   alias Neoscan.Claims.Claim
 
+  @derive {Poison.Encoder, except: [:__meta__, :__struct__]}
   schema "claims" do
     field(:address_hash, :string)
     field(:txids, {:array, :string})
