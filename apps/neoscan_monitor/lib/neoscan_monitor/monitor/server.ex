@@ -76,8 +76,18 @@ defmodule NeoscanMonitor.Server do
     check_endpoint = function_exported?(NeoscanWeb.Endpoint, :broadcast, 3)
 
     if check_endpoint do
-      broadcast = Application.fetch_env!(:neoscan_monitor, :broadcast)
-      broadcast.(payload)
+      case Application.fetch_env(:neoscan_monitor, :broadcast) do
+        {:ok, [topic, event]} ->
+          NeoscanWeb.Endpoint.broadcast(topic, event, payload)
+        {:ok, _} ->
+          raise ArgumentError,
+                "fetched application environment :broadcast for application :neoscan_monitor " <>
+                 "is not in correct format"
+        {:error} ->
+          raise ArgumentError,
+                "could not fetch application environment :broadcast for application :neoscan_monitor " <>
+                 "because configuration :broadcast was not set"
+      end
     end
 
     # In 10 seconds

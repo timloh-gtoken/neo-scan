@@ -39,7 +39,7 @@ config :number,
     separator: "."
   ]
 
-config :neoscan_monitor, broadcast: &NeoscanWeb.Endpoint.broadcast("room:home", "change", &1)
+config :neoscan_monitor, broadcast: ["room:home", "change"]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
