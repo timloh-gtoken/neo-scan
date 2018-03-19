@@ -1,0 +1,9 @@
+.fetch
+.git
+_build
+/cover
+deps
+/doc
+node_modules
+priv
+erl_crash.dump
