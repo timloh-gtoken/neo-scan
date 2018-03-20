@@ -4,13 +4,17 @@ defmodule Neoscan.Repair do
   alias Neoscan.Repo
   alias Neoscan.Addresses
   alias Neoscan.Transactions
+  alias Neoscan.Transfers
   alias Neoscan.Transactions.Transaction
+  alias Neoscan.Blocks
   alias Neoscan.Blocks.Block
   alias Neoscan.Vouts
   alias Neoscan.Vouts.Vout
   alias NeoscanSync.Blockchain
   alias NeoscanSync.HttpCalls
   alias NeoscanSync.Consumer
+  alias NeoscanSync.Producer
+  alias NeoscanSync.Notifications
 
   # trigger repair if information is missing
   def repair_missing([], root) do
@@ -168,7 +172,8 @@ defmodule Neoscan.Repair do
   def get_and_add_missing_block(hash) do
     case Blockchain.get_block_by_hash(HttpCalls.url(1), hash) do
       {:ok, block} ->
-        Consumer.add_block(block)
+        Producer.add_notifications(block, block["index"])
+        |> Consumer.add_block()
 
       _ ->
         get_and_add_missing_block(hash)
@@ -179,7 +184,8 @@ defmodule Neoscan.Repair do
   def get_and_add_missing_block_from_height(height) do
     case Blockchain.get_block_by_height(HttpCalls.url(1), height) do
       {:ok, block} ->
-        Consumer.add_block(block)
+        Producer.add_notifications(block, height)
+        |> Consumer.add_block()
 
       _ ->
         get_and_add_missing_block_from_height(height)
@@ -203,7 +209,7 @@ defmodule Neoscan.Repair do
         |> Enum.uniq()
 
       false ->
-        [{:ok, "Created"}]
+        [{:ok, "Created", []}]
     end
   end
 
@@ -212,33 +218,57 @@ defmodule Neoscan.Repair do
   end
 
   # adds missing vouts after verifying missing blocks and transactions
-  def add_missing_vouts(list, tuples) when list == [{:ok, "Created"}] do
-    Enum.filter(tuples, fn {key, _tuple} -> key == :vouts_missing end)
-    |> Enum.map(fn {_key, {db_transaction, vouts}} -> {db_transaction, vouts} end)
-    |> Enum.group_by(fn {db_transaction, _transaction} -> db_transaction end)
-    |> Map.to_list()
-    |> Enum.map(fn {db_transaction, vouts_tuple} ->
-      {db_transaction, filter_tuples(vouts_tuple)}
-    end)
-    |> Enum.map(fn {db_transaction, vouts} ->
-      address_list =
-        Addresses.get_transaction_addresses(
-          [],
-          List.flatten(vouts),
-          db_transaction.time,
-          nil
-        )
+  def add_missing_vouts(list, tuples) do
+    case Enum.any?(list, fn {atom, _string, _list} -> atom != :ok end) do
+      true ->
+        raise "error fetching and adding missing transactions"
+      false ->
+        Enum.filter(tuples, fn {key, _tuple} -> key == :vouts_missing end)
+        |> Enum.map(fn {_key, {db_transaction, vouts}} -> {db_transaction, vouts} end)
+        |> Enum.group_by(fn {db_transaction, _transaction} -> db_transaction end)
+        |> Map.to_list()
+        |> Enum.map(fn {db_transaction, vouts_tuple} ->
+          {db_transaction, filter_tuples(vouts_tuple)}
+        end)
+        |> Enum.map(fn {db_transaction, vouts} ->
+          address_list =
+            Addresses.get_transaction_addresses(
+              [],
+              List.flatten(vouts),
+              db_transaction.time,
+              nil
+            )
 
-      Vouts.create_vouts(db_transaction, List.flatten(vouts), address_list)
-    end)
-  end
-
-  def add_missing_vouts(_, _tuples) do
-    raise "error fetching and adding missing transactions"
+          Vouts.create_vouts(db_transaction, List.flatten(vouts), address_list)
+        end)
+    end
   end
 
   # filter the content from the tuples
   def filter_tuples(tuples) do
     Enum.map(tuples, fn {_block, content} -> content end)
+  end
+
+  def repair_transfers() do
+    {:ok, index} = Blocks.get_highest_block_in_db()
+    0..index
+    |> Enum.each(fn index -> check_transfers_for_block(index) end)
+  end
+
+  def check_transfers_for_block(index) do
+    Notifications.get_block_notifications(index)
+    |> Enum.map(fn transfer -> check_transfer(transfer) end)
+  end
+
+  def check_transfer(transfer) do
+    check_hash = "#{transfer["txid"]}#{transfer["address_from"]}#{transfer["address_to"]}"
+
+    case Transfers.check_if_transfer_exist(check_hash) do
+      true ->
+        "ok"
+      false ->
+        block = Blocks.get_block_by_height(transfer["block"])
+        Transfers.add_block_transfers(block, block.time)
+    end
   end
 end

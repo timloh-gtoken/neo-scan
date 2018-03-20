@@ -14,6 +14,7 @@ defmodule Neoscan.Transactions do
   alias Neoscan.Addresses
   alias Neoscan.Vouts
   alias Neoscan.Stats
+  alias Neoscan.TxAbstracts
 
   require Logger
 
@@ -24,7 +25,8 @@ defmodule Neoscan.Transactions do
     "IssueTransaction",
     "RegisterTransaction",
     "EnrollmentTransaction",
-    "ClaimTransaction"
+    "ClaimTransaction",
+    "StateTransaction"
   ]
 
   @doc """
@@ -124,10 +126,10 @@ defmodule Neoscan.Transactions do
     transaction_query =
       from(
         e in Transaction,
+        where: e.asset_moved == ^hash and e.type != "MinerTransaction",
         order_by: [
           desc: e.id
         ],
-        where: e.asset_moved == ^hash and e.type != "MinerTransaction",
         select: %{
           :id => e.id,
           :type => e.type,
@@ -498,7 +500,12 @@ defmodule Neoscan.Transactions do
         "block_height" => height
       })
       |> set_transaction_asset(vouts)
-      |> Map.delete("vout")
+
+
+    TxAbstracts.create_abstracts_from_tx(transaction)
+
+    transaction = transaction
+                  |> Map.delete("vout")
 
     Transaction.changeset_with_block(block, transaction)
     |> Repo.insert!()
@@ -630,7 +637,7 @@ defmodule Neoscan.Transactions do
   def create_transactions(block, transactions) do
     case Enum.each(transactions, fn transaction -> create_transaction(block, transaction) end) do
       :ok ->
-        {:ok, "Created"}
+        {:ok, "Created", block}
 
       _ ->
         {:error, "failed to create transactions"}

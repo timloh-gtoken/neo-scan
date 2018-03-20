@@ -10,6 +10,8 @@ defmodule Neoscan.Blocks do
   alias Neoscan.Transactions.Transaction
   alias NeoscanMonitor.Api
   alias Neoscan.Stats
+  alias NeoscanSync.HttpCalls
+  alias NeoscanSync.Blockchain
 
   @doc """
   Returns the list of blocks.
@@ -227,6 +229,29 @@ defmodule Neoscan.Blocks do
   end
 
   @doc """
+  Get the block time by its heigh value
+
+  ## Examples
+
+      iex> get_block_time(123)
+      12518982
+
+      iex> get_block_time(456)
+      nill
+
+  """
+  def get_block_time(height) do
+    url = HttpCalls.url(1)
+
+    case Blockchain.get_block_by_height(url, height) do
+      {:ok, block} ->
+        Map.get(block, "time")
+      _ ->
+        get_block_time(height)
+    end
+  end
+
+  @doc """
   Creates a block.
 
   ## Examples
@@ -422,14 +447,22 @@ defmodule Neoscan.Blocks do
   def compute_fees(block) do
     sys_fee =
       Enum.reduce(block["tx"], 0, fn tx, acc ->
-        {num, _st} = Float.parse(tx["sys_fee"])
-        acc + num
+        case Float.parse(tx["sys_fee"]) do
+          {num, _st} ->
+            acc + num
+          :error ->
+            acc + 0
+        end
       end)
 
     net_fee =
       Enum.reduce(block["tx"], 0, fn tx, acc ->
-        {num, _st} = Float.parse(tx["net_fee"])
-        acc + num
+        case Float.parse(tx["net_fee"]) do
+          {num, _st} ->
+            acc + num
+          :error ->
+            acc + 0
+        end
       end)
 
     Map.merge(block, %{"total_sys_fee" => sys_fee, "total_net_fee" => net_fee})

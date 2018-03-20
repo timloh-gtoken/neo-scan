@@ -28,6 +28,7 @@ defmodule Neoscan.Blocks.Block do
     field(:gas_generated, :float)
 
     has_many(:transactions, Neoscan.Transactions.Transaction)
+    has_many(:transfers, Neoscan.Transfers.Transfer)
 
     timestamps()
   end

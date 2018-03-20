@@ -45,6 +45,7 @@
         </div>
 				<ul class="language-dropdown-options">
           <li value="en" class="<%= if get_language(@conn) == "en" do %>active-lang<% end %>">English</li>
+          <li value="nl" class="<%= if get_language(@conn) == "nl" do %>active-lang<% end %>">Nederlands</li>
           <li value="de" class="<%= if get_language(@conn) == "de" do %>active-lang<% end %>">Deutsch</li>
           <li value="fr" class="<%= if get_language(@conn) == "fr" do %>active-lang<% end %>">Français</li>
           <li value="it" class="<%= if get_language(@conn) == "it" do %>active-lang<% end %>">Italiano</li>
@@ -79,15 +80,18 @@
 					<li>
 						<a href="<%= transactions_path(@conn, :index) %>" alt="Explorer" title="Explorer" class="nav-link <%= if is_transactions_path(@conn), do: " active" %>"><%= gettext "Transactions" %></a>
 					</li>
+					<!-- <li>
+						<a href="<%= transfers_path(@conn, :index) %>" alt="Explorer" title="Explorer" class="nav-link <%= if is_transfers_path(@conn), do: " active" %>"><%= gettext "Transfers" %></a>
+					</li> -->
 					<li>
 						<a href="<%= addresses_path(@conn, :index) %>" alt="Explorer" title="Explorer" class="nav-link <%= if is_addresses_path(@conn), do: " active" %>"><%= gettext "Wallet Addresses" %></a>
 					</li>
 					<li>
 						<a href="<%= blocks_path(@conn, :index) %>" alt="Explorer" title="Explorer" class="nav-link <%= if is_blocks_path(@conn), do: " active" %>"><%= gettext "Blocks" %></a>
 					</li>
-					<li>
+					<!-- <li>
 						<a href="<%= assets_path(@conn, :index) %>" alt="Explorer" title="Explorer" class="nav-link <%= if is_assets_path(@conn), do: " active" %>"><%= gettext "Assets" %></a>
-					</li>
+					</li> -->
 					<li>
 						<a href="<%= doc_path(@conn, :index) %>" alt="Explorer" title="Explorer" class="nav-link <%= if is_doc_path(@conn), do: " active" %>"><%= gettext "API" %></a>
 					</li>
@@ -119,7 +123,7 @@
 
 				<div class="right-footer-information">
 					<div class="footer-link-wrapper">
-						<a href="http://slack.cityofzion.io/" alt="<%= gettext "NEO Slack"%>" title="<%= gettext "NEO Slack"%>" class="coz-slack"><%= gettext "NEO Slack" %></a>
+						<a href="https://discord.gg/Md676aR" alt="<%= gettext "NEO Discord"%>" title="<%= gettext "NEO Discord"%>" class="coz-discord"><%= gettext "NEO Discord" %></a>
 					</div>
 					<div class="footer-link-wrapper">
 						<a href="https://github.com/CityOfZion" alt="<%= gettext "City of Zion Github" %>" title="<%= gettext "City of Zion Github" %>" class="coz-github"><%= gettext "City of Zion Github" %></a>

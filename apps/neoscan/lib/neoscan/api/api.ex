@@ -11,9 +11,11 @@ defmodule Neoscan.Api do
   alias Neoscan.Addresses.Address
   alias Neoscan.BalanceHistories.History
   alias Neoscan.Transactions
+  alias Neoscan.Transfers.Transfer
   alias Neoscan.Transactions.Transaction
   alias Neoscan.ChainAssets
   alias Neoscan.ChainAssets.Asset
+  alias Neoscan.BalanceHistories
   alias Neoscan.Blocks.Block
   alias Neoscan.Blocks
   alias Neoscan.Vouts
@@ -23,6 +25,8 @@ defmodule Neoscan.Api do
   alias Neoscan.Claims.Claim
   alias Neoscan.Claims.Unclaimed
   alias Neoscan.Stats
+  alias Neoscan.Repair
+  alias Neoscan.TxAbstracts
 
   @doc """
   Returns the balance for an address from its `hash_string`
@@ -141,14 +145,23 @@ defmodule Neoscan.Api do
 
   """
   def get_claimed(hash) do
+
+    claim_query =
+      from(
+        h in Claim,
+        select: %{
+          txids: h.txids
+        }
+      )
+
     query =
       from(
         e in Address,
         where: e.address == ^hash,
-        select: %{
-          :address => e.address,
-          :claimed => e.claimed
-        }
+        preload: [
+          claimed: ^claim_query
+        ],
+        select: e
       )
 
     result =
@@ -157,8 +170,8 @@ defmodule Neoscan.Api do
         nil ->
           %{:address => "not found", :claimed => nil}
 
-        %{} = address ->
-          address
+        %{:address => hash, :claimed => claimed} ->
+          %{:address => hash, :claimed => claimed}
       end
 
     result
@@ -628,6 +641,7 @@ defmodule Neoscan.Api do
   """
   def get_block(hash_or_integer) do
     tran_query = from(t in Transaction, select: t.txid)
+    trans_query = from(t in Transfer, select: t.txid)
 
     query =
       try do
@@ -638,7 +652,8 @@ defmodule Neoscan.Api do
             e in Block,
             where: e.hash == ^hash_or_integer,
             preload: [
-              transactions: ^tran_query
+              transactions: ^tran_query,
+              transfers: ^trans_query
             ]
           )
       else
@@ -647,7 +662,8 @@ defmodule Neoscan.Api do
             e in Block,
             where: e.index == ^hash_or_integer,
             preload: [
-              transactions: ^tran_query
+              transactions: ^tran_query,
+              transfers: ^trans_query
             ]
           )
       end
@@ -717,16 +733,17 @@ defmodule Neoscan.Api do
   """
   def get_last_blocks do
     tran_query = from(t in Transaction, select: t.txid)
+    trans_query = from(t in Transfer, select: t.txid)
 
     query =
       from(
         e in Block,
-        where: e.index > 1_200_000,
         order_by: [
           fragment("? DESC NULLS LAST", e.index)
         ],
         preload: [
-          transactions: ^tran_query
+          transactions: ^tran_query,
+          transfers: ^trans_query
         ],
         limit: 20
       )
@@ -771,16 +788,17 @@ defmodule Neoscan.Api do
   """
   def get_highest_block do
     tran_query = from(t in Transaction, select: t.txid)
+    trans_query = from(t in Transfer, select: t.txid)
 
     query =
       from(
         e in Block,
-        where: e.index > 1_200_000,
         order_by: [
           fragment("? DESC NULLS LAST", e.index)
         ],
         preload: [
-          transactions: ^tran_query
+          transactions: ^tran_query,
+          transfers: ^trans_query
         ],
         limit: 1
       )
@@ -1030,22 +1048,126 @@ defmodule Neoscan.Api do
   end
 
   @doc """
+  Returns the last 15 transaction models in the chain for the selected address
+  from its hash_string, paginated.
+
+  ## Examples
+
+      /api/main_net/v1/get_last_transactions_by_address/{hash_string}/{page}
+      [{
+          "vouts": [
+            {
+              "value": float,
+              "n": integer,
+              "asset": "name_string",
+              "address": "hash_string"
+            },
+            ...
+          ],
+          "vin": [
+            {
+              "value": float,
+              "txid": "tx_id_string",
+              "n": integer,
+              "asset": "name_string",
+              "address_hash": "hash_string"
+            },
+            ...
+          ],
+          "transfers": [
+            {
+              "address_from": "hash_string",
+              "address_to": "hash_string",
+              "amount": "integer",
+              "block_height": "integer",
+              "txid": "tx_id_string",
+              "contract": "token_contract_string",
+              "time": "integer",
+            },
+            ...
+          ],
+          "version": integer,
+          "type": "type_string",
+          "txid": "tx_id_string",
+          "time": unix_time,
+          "sys_fee": "string",
+          "size": integer,
+          "scripts": [
+            {
+              "verification": "hash_string",
+              "invocation": "hash_string"
+            }
+          ],
+          "pubkey": hash_string,
+          "nonce": integer,
+          "net_fee": "string",
+          "description": string,
+          "contract": array,
+          "claims": array,
+          "block_height": integer,
+          "block_hash": "hash_string",
+          "attributes": array,
+          "asset": array
+        },
+        ...
+      ]
+
+  """
+  def get_last_transactions_by_address(hash_string, page) do
+
+    transactions =
+      BalanceHistories.paginate_history_transactions(
+        hash_string,
+        page || 1
+      )
+
+    transactions
+  end
+
+  @doc """
   Returns all working nodes and their respective heights.
-  Information is updated each 5 minutes.
+  Information is updated each minute.
 
   Currrent tested nodes are:
 
-  http://seed1.cityofzion.io:8080
-  http://seed2.cityofzion.io:8080
-  http://seed3.cityofzion.io:8080
-  http://seed4.cityofzion.io:8080
-  http://seed5.cityofzion.io:8080
-  http://api.otcgo.cn:10332
-  http://seed1.neo.org:10332
-    http://seed2.neo.org:10332
-    http://seed3.neo.org:10332
-    http://seed4.neo.org:10332
-  http://seed5.neo.org:10332
+  "http://seed1.cityofzion.io:8080",
+  "http://seed2.cityofzion.io:8080",
+  "http://seed3.cityofzion.io:8080",
+  "http://seed4.cityofzion.io:8080",
+  "http://seed5.cityofzion.io:8080",
+  "http://api.otcgo.cn:10332",
+  "https://seed1.neo.org:10331",
+  "http://seed2.neo.org:10332",
+  "http://seed3.neo.org:10332",
+  "http://seed4.neo.org:10332",
+  "http://seed5.neo.org:10332",
+  "http://seed0.bridgeprotocol.io:10332",
+  "http://seed1.bridgeprotocol.io:10332",
+  "http://seed2.bridgeprotocol.io:10332",
+  "http://seed3.bridgeprotocol.io:10332",
+  "http://seed4.bridgeprotocol.io:10332",
+  "http://seed5.bridgeprotocol.io:10332",
+  "http://seed6.bridgeprotocol.io:10332",
+  "http://seed7.bridgeprotocol.io:10332",
+  "http://seed8.bridgeprotocol.io:10332",
+  "http://seed9.bridgeprotocol.io:10332",
+  "http://seed1.redpulse.com:10332",
+  "http://seed2.redpulse.com:10332",
+  "https://seed1.redpulse.com:10331",
+  "https://seed2.redpulse.com:10331",
+  "http://seed1.treatail.com:10332",
+  "http://seed2.treatail.com:10332",
+  "http://seed3.treatail.com:10332",
+  "http://seed4.treatail.com:10332",
+  "http://seed1.o3node.org:10332",
+  "http://seed2.o3node.org:10332",
+  "http://54.66.154.140:10332",
+  "http://seed1.eu-central-1.fiatpeg.com:10332",
+  "http://seed1.eu-west-2.fiatpeg.com:10332",
+  "http://seed1.aphelion.org:10332",
+  "http://seed2.aphelion.org:10332",
+  "http://seed3.aphelion.org:10332",
+  "http://seed4.aphelion.org:10332",
 
   ## Examples
 
@@ -1130,4 +1252,57 @@ defmodule Neoscan.Api do
     Blocks.count_blocks()
     |> Stats.set_blocks()
   end
+
+  def repair_trasfers() do
+    Repair.repair_transfers()
+  end
+
+  @doc """
+  Returns abstract models for an address from its `hash_string`, paginated
+
+  ## Examples
+
+      /api/main_net/v1/get_address_abstracts/{hash_string}/{page}
+      [
+        {
+          "address_from": "hash_string",
+          "address_to": "hash_string",
+          "amount": string,
+          "block_height": integer,
+          "txid": "tx_id_string",
+          "asset": "asset_id_string",
+          "time": integer,
+        },
+        ...
+      ]
+
+  """
+  def get_address_abstracts(hash, page) do
+    TxAbstracts.get_address_abstracts(hash,page)
+  end
+
+  @doc """
+  Returns abstract models for an address, to an address from their `hash_string`, paginated
+
+  ## Examples
+
+      /api/main_net/v1/get_address_to_address_abstracts/{hash_string}/{hash_string}/{page}
+      [
+        {
+          "address_from": "hash_string",
+          "address_to": "hash_string",
+          "amount": string,
+          "block_height": integer,
+          "txid": "tx_id_string",
+          "asset": "asset_id_string",
+          "time": integer,
+        },
+        ...
+      ]
+
+  """
+  def get_address_to_address_abstracts(hash1, hash2, page) do
+    TxAbstracts.get_address_to_address_abstracts(hash1, hash2, page)
+  end
+
 end

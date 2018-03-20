@@ -24,6 +24,7 @@ defmodule Neoscan.Transactions.Transaction do
     field(:asset, :map)
     field(:description, :string)
     field(:contract, :map)
+    field(:descriptors, {:array, :map})
 
     field(:asset_moved, :string)
 
@@ -56,7 +57,8 @@ defmodule Neoscan.Transactions.Transaction do
       :description,
       :contract,
       :asset_moved,
-      :script
+      :script,
+      :descriptors
     ])
     |> assoc_constraint(:block, required: true)
     |> unique_constraint(:txid)
@@ -98,7 +100,8 @@ defmodule Neoscan.Transactions.Transaction do
       :description,
       :contract,
       :asset_moved,
-      :script
+      :script,
+      :descriptors
     ])
     |> assoc_constraint(:block, required: true)
     |> validate_required([

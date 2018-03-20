@@ -6,6 +6,7 @@ defmodule NeoscanWeb.LayoutView do
 
   @languages %{
     "en" => "English",
+    "nl" => "Nederlands",    
     "fr" => "Français",
     "pt-br" => "Português",
     "it" => "Italiano",
@@ -24,6 +25,10 @@ defmodule NeoscanWeb.LayoutView do
 
   def is_transactions_path(conn) do
     Controller.controller_module(conn) == NeoscanWeb.TransactionsController
+  end
+
+  def is_transfers_path(conn) do
+    Controller.controller_module(conn) == NeoscanWeb.TransfersController
   end
 
   def is_addresses_path(conn) do
