@@ -23,10 +23,8 @@ RUN export MIX_ENV=prod && \
     cd apps/neoscan_web/assets && \
     npm install && \
     ./node_modules/brunch/bin/brunch b -p && \
-    cd .. && \
-    mkdir -p priv/static && \
-    cd ../.. && \
-    mix phx.digest assets -o priv/static && \
+    cd ../../.. && \
+    mix phx.digest && \
     mix release
 
 RUN RELEASE_NAME=`echo ${APP_NAME} | tr '-' '_'` && \
