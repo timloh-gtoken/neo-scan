@@ -141,16 +141,36 @@ defmodule Neoscan.TxAbstracts do
   end
 
   def build_list_for_vouts(transaction) do
-    %{:address_hash => address_from, :asset => asset} = transaction["vin"]
+    %{:address_hash => address_from, :value => amount_from, :asset => asset_from} = transaction["vin"]
                                                    |> List.first
 
-    Enum.map(transaction["vout"], fn %{"address" => address, "value" => amount} ->
+    Enum.map(transaction["vout"], fn %{"address" => address, "value" => amount, "asset" => asset} ->
       cond do
-        address != address_from ->
+        (address != address_from) || (transaction["type"] == "IssueTransaction" && asset != asset_from) ->
           %{
             :address_from => address_from,
             :address_to => address,
             :amount => amount,
+            :block_height => transaction["block_height"],
+            :txid => transaction["txid"],
+            :asset => String.slice(to_string(asset), -64..-1),
+            :time => transaction["time"]
+          }
+        (transaction["type"] == "InvocationTransaction" && amount_from > amount) ->
+          %{
+            :address_from => address_from,
+            :address_to => "system",
+            :amount => amount_from - amount,
+            :block_height => transaction["block_height"],
+            :txid => transaction["txid"],
+            :asset => String.slice(to_string(asset), -64..-1),
+            :time => transaction["time"]
+          }
+        (address == address_from && asset == asset_from && amount_from > amount) ->
+          %{
+            :address_from => address_from,
+            :address_to => "system",
+            :amount => amount_from - amount,
             :block_height => transaction["block_height"],
             :txid => transaction["txid"],
             :asset => String.slice(to_string(asset), -64..-1),
