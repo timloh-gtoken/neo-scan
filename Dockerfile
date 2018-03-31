@@ -2,21 +2,18 @@ ARG APP_NAME="timloh-gtoken-neo-scan"
 ARG WORK_DIR="/opt/${APP_NAME}"
 
 # Build
-FROM elixir:1.6-slim as build
+FROM elixir:1.6 as build
 
 ARG APP_NAME
 ARG WORK_DIR
 
 COPY . .
 
-RUN apt-get update && \
-    apt-get install -y curl git-core inotify-tools build-essential && \
-    mix local.hex --force && \
-    mix local.rebar --force
-    
 RUN curl -sL https://deb.nodesource.com/setup_8.x | bash - && \
     apt-get update && \
-    apt-get install nodejs
+    apt-get install -y inotify-tools nodejs && \
+    mix local.hex --force && \
+    mix local.rebar --force
 
 RUN export MIX_ENV=prod && \
     mix deps.get && \
@@ -33,7 +30,7 @@ RUN RELEASE_NAME=`echo ${APP_NAME} | tr '-' '_'` && \
     tar -xf "${RELEASE_DIR}/${RELEASE_NAME}.tar.gz" -C /export
 
 # Deployment
-FROM debian:jessie
+FROM debian:stretch
 
 ARG APP_NAME
 ARG WORK_DIR
@@ -45,7 +42,7 @@ ENV REPLACE_OS_VARS=true \
     PORT=4000
 
 RUN apt-get update && \
-    apt-get install -y ca-certificates libodbc1 libssl1.0.0 libsctp1
+    apt-get install -y ca-certificates libodbc1 libssl1.1 libsctp1
 
 RUN groupadd -r default && \
     useradd -r -g default default && \
@@ -58,4 +55,4 @@ USER default
 WORKDIR ${WORK_DIR}
 
 ENTRYPOINT ["bin/timloh_gtoken_neo_scan"]
-CMD ["start"]
+CMD ["foreground"]
