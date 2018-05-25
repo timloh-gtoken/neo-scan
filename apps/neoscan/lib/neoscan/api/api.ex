@@ -1,7 +1,7 @@
 defmodule Neoscan.Api do
   @moduledoc """
-    Main API for accessing data from the explorer.
-    All data is provided through GET requests in `/api/main_net/v1`.
+    test API for accessing data from the explorer.
+    All data is provided through GET requests in `/api/test_net/v1`.
     Testnet isn't currently available.
   """
 
@@ -32,7 +32,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_balance/{hash_string}
+      /api/test_net/v1/get_balance/{hash_string}
       {
         "balance": [
           {
@@ -89,7 +89,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_unclaimed/{hash_string}
+      /api/test_net/v1/get_unclaimed/{hash_string}
       {
         "unclaimed": float,
         "address": "hash_string"
@@ -124,7 +124,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_claimed/{hash_string}
+      /api/test_net/v1/get_claimed/{hash_string}
       {
         "claimed": [
           {
@@ -180,7 +180,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_claimable/{hash_string}
+      /api/test_net/v1/get_claimable/{hash_string}
       {
         "unclaimed": float,
         "claimable": [
@@ -233,7 +233,7 @@ defmodule Neoscan.Api do
   Returns the address model from its `hash_string`
 
   ## Examples
-      /api/main_net/v1/get_address/{hash_string}
+      /api/test_net/v1/get_address/{hash_string}
       {
         "txids": [
           {
@@ -346,7 +346,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_address_neon/{hash_string}
+      /api/test_net/v1/get_address_neon/{hash_string}
       {
         "txids": [
           {
@@ -520,7 +520,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_asset/{hash_string}
+      /api/test_net/v1/get_asset/{hash_string}
       {
         "type": "type_string",
         "txid": "tx_id_string",
@@ -568,8 +568,8 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_block/{hash_string}
-      /api/main_net/v1/get_block/{height}
+      /api/test_net/v1/get_block/{hash_string}
+      /api/test_net/v1/get_block/{height}
       {
         "version": integer,
         "tx_count": integer,
@@ -656,7 +656,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_last_blocks
+      /api/test_net/v1/get_last_blocks
      [
         {
           "version": integer,
@@ -708,7 +708,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_highest_block
+      /api/test_net/v1/get_highest_block
       {
         "version": integer,
         "tx_count": integer,
@@ -758,7 +758,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_transaction/{hash_string}
+      /api/test_net/v1/get_transaction/{hash_string}
       {
         "vouts": [
           {
@@ -877,8 +877,8 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_last_transactions/{type}
-      /api/main_net/v1/get_last_transactions
+      /api/test_net/v1/get_last_transactions/{type}
+      /api/test_net/v1/get_last_transactions
       [{
           "vouts": [
             {
@@ -990,7 +990,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_last_transactions_by_address/{hash_string}/{page}
+      /api/test_net/v1/get_last_transactions_by_address/{hash_string}/{page}
       [{
           "vouts": [
             {
@@ -1107,7 +1107,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_all_nodes
+      /api/test_net/v1/get_all_nodes
             [
               {
                 "url": "http://seed1.cityofzion.io:8080",
@@ -1127,7 +1127,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_nodes
+      /api/test_net/v1/get_nodes
       {
         "urls": [
           "http://seed1.cityofzion.io: 8080",
@@ -1146,7 +1146,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_height
+      /api/test_net/v1/get_height
       {
         "height": 1239809
       }
@@ -1162,7 +1162,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_fees_in_range/500-1000
+      /api/test_net/v1/get_fees_in_range/500-1000
       {
         "total_sys_fee": 0,
         "total_net_fee": 0
@@ -1198,7 +1198,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_address_abstracts/{hash_string}/{page}
+      /api/test_net/v1/get_address_abstracts/{hash_string}/{page}
       [
         {
           "address_from": "hash_string",
@@ -1222,7 +1222,7 @@ defmodule Neoscan.Api do
 
   ## Examples
 
-      /api/main_net/v1/get_address_to_address_abstracts/{hash_string}/{hash_string}/{page}
+      /api/test_net/v1/get_address_to_address_abstracts/{hash_string}/{hash_string}/{page}
       [
         {
           "address_from": "hash_string",

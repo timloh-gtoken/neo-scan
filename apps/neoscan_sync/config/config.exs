@@ -9,6 +9,6 @@ config :logger, :console,
 config :neoscan_sync,
   # Block height to start notifications check
   # genstage demand size
-  demand_size: 150
+  demand_size: 10
 
 config :neoscan_sync, should_start: Mix.env() not in [:test]

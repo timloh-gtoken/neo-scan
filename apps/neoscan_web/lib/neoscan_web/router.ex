@@ -47,7 +47,7 @@ defmodule NeoscanWeb.Router do
     post("/", HomeController, :search)
   end
 
-  scope "/api/main_net/v1", NeoscanWeb do
+  scope "/api/test_net/v1", NeoscanWeb do
     pipe_through(:api)
 
     get("/get_balance/:hash", ApiController, :get_balance)
