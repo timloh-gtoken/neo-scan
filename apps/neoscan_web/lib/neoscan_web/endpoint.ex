@@ -24,6 +24,7 @@ defmodule NeoscanWeb.Endpoint do
     plug(Phoenix.CodeReloader)
   end
 
+  plug(Spandex.Plug.StartTrace)
   plug(Plug.RequestId)
   plug(Plug.Logger)
 
@@ -49,6 +50,8 @@ defmodule NeoscanWeb.Endpoint do
 
   plug(CORSPlug)
   plug(NeoscanWeb.Router)
+  plug(Spandex.Plug.AddContext)
+  plug(Spandex.Plug.EndTrace)
 
   @doc """
   Callback invoked for dynamically configuring the endpoint.

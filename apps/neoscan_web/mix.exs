@@ -66,7 +66,8 @@ defmodule NeoscanWeb.Mixfile do
       {:cors_plug, "~> 1.2"},
       {:wobserver, "~> 0.1"},
       {:timex, "~> 3.1"},
-      {:number, "~> 0.5.4"}
+      {:number, "~> 0.5.4"},
+      {:spandex, "~> 1.3.4"}
     ]
   end
 

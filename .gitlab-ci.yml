@@ -39,6 +39,7 @@ staging:
     - docker-compose -f docker-compose.prod.yml up -d
   variables:
     HOST: neoscan.backslash.fr
+    DISABLE_SPANDEX: false
   tags:
     - staging
   when: manual
