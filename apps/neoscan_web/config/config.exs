@@ -62,7 +62,16 @@ config :spandex, :datadog,
   port: {:system, "DATADOG_PORT", 8126},
   batch_size: 10,
   sync_threshold: 20,
-  services: []
+  # for defaults mapping in spans service => type
+  services: [
+    ecto: :db,
+    my_api: :web,
+    my_cache: :cache
+  ],
+  # Do not set the following configurations unless you are sure.
+  # Traces will get sent in background
+  api_adapter: Spandex.Datadog.ApiServer,
+  asynchronous_send?: true
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
