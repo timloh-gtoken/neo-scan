@@ -117,7 +117,7 @@ defmodule NeoscanSync.Syncer do
       transaction.block_time
     }'\t#{array_json(transaction.attributes)}\t#{transaction.net_fee}\t#{transaction.sys_fee}\t#{
       transaction.nonce
-    }\t#{array_json(transaction.scripts)}\t#{transaction.size}\t'#{transaction.type}'\t#{
+    }\t#{array_json(transaction.scripts)}\t#{transaction.size}\t#{transaction.type}\t#{
       transaction.version
     }\t'#{transaction.inserted_at}'\t'#{transaction.updated_at}'\n"
   end
